@@ -1,12 +1,12 @@
 package main
 
 import (
-	"ebigrid/grid"
 	"fmt"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/marble-fox/ebigrid/grid"
 )
 
 type Game struct {
@@ -33,7 +33,7 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.Grid.DebugDraw(screen, g.shiftX, g.shiftY, false)
+	g.Grid.DebugDraw(screen, g.shiftX, g.shiftY, true)
 
 	fps := ebiten.ActualFPS()
 	tps := ebiten.ActualTPS()

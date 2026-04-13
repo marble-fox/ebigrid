@@ -146,6 +146,7 @@ func (g *RectGrid) DebugDraw(screen *ebiten.Image, shiftX, shiftY int, drawCoord
 				img := ebiten.NewImageFromImage(g.cellDebugShape)
 				ebitenutil.DebugPrint(img, fmt.Sprint(cx, "\n", cy))
 				screen.DrawImage(img, op)
+				img.Clear()
 				continue
 			}
 
