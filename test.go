@@ -10,23 +10,24 @@ import (
 )
 
 type Game struct {
-	Grid           *grid.RectGrid
-	shiftX, shiftY int
+	Grid                     *grid.RectGrid
+	cameraSpeed              int
+	resolutionX, resolutionY int
+	shiftX, shiftY           int
 }
 
 func (g *Game) Update() error {
-	speed := 3
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		g.shiftX -= speed
+		g.shiftX -= g.cameraSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		g.shiftX += speed
+		g.shiftX += g.cameraSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		g.shiftY -= speed
+		g.shiftY -= g.cameraSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		g.shiftY += speed
+		g.shiftY += g.cameraSpeed
 	}
 
 	return nil
@@ -54,23 +55,31 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func main() {
-	game := Game{
-		Grid: grid.NewRectGrid(
-			30,
-			30,
-			0,
-			0,
-			30,
-			30,
-		),
-		shiftX: 0,
-		shiftY: 0,
+	newGrid, err := grid.NewRectGrid(
+		42,
+		42,
+		0,
+		0,
+		15,
+		15,
+	)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	ebiten.SetWindowSize(1296, 810)
+	game := Game{
+		Grid:        newGrid,
+		cameraSpeed: 3,
+		resolutionX: 1280,
+		resolutionY: 720,
+		shiftX:      0,
+		shiftY:      0,
+	}
+
+	ebiten.SetWindowSize(game.resolutionX, game.resolutionY)
 	//ebiten.SetFullscreen(true)
 
-	err := ebiten.RunGame(&game)
+	err = ebiten.RunGame(&game)
 	if err != nil {
 		log.Fatal(err)
 	}

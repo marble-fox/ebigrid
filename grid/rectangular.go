@@ -9,19 +9,22 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+var ErrInvalidGridSize = fmt.Errorf("invalid grid size")
+var ErrInvalidFiniteGridSize = fmt.Errorf("invalid finite grid size")
+
 type RectGrid struct {
 	CellWidth, CellHeight              int
 	HorizontalSpacing, VerticalSpacing int
 	Columns, Rows                      int
 
-	rw, rh         float64 // https://www.desmos.com/calculator/r65yav4ucs
+	rw, rh         float64
 	finite         bool
 	cellDebugShape *ebiten.Image
 }
 
-func NewRectGrid(cellWidth, cellHeight, horizontalSpacing, verticalSpacing, columns, rows int) *RectGrid {
+func NewRectGrid(cellWidth, cellHeight, horizontalSpacing, verticalSpacing, columns, rows int) (*RectGrid, error) {
 	if columns < 0 || rows < 0 {
-		// TODO Error: Invalid grid size
+		return nil, ErrInvalidGridSize
 	}
 
 	rw := float64(cellWidth) / float64(cellWidth+horizontalSpacing)
@@ -46,11 +49,11 @@ func NewRectGrid(cellWidth, cellHeight, horizontalSpacing, verticalSpacing, colu
 			rh:             rh,
 			finite:         false,
 			cellDebugShape: debugImg,
-		}
+		}, nil
 	}
 
 	if zeroColumns || zeroRows {
-		// TODO Error: Invalid finite grid size
+		return nil, ErrInvalidFiniteGridSize
 	}
 
 	// Finite grid
@@ -66,7 +69,7 @@ func NewRectGrid(cellWidth, cellHeight, horizontalSpacing, verticalSpacing, colu
 		rh:             rh,
 		finite:         true,
 		cellDebugShape: debugImg,
-	}
+	}, nil
 }
 
 func (g *RectGrid) CellCoordinatesFromPos(posX, posY int) (int, int, bool) {
