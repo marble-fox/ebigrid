@@ -2,6 +2,7 @@ package demos
 
 import (
 	"fmt"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -83,20 +84,30 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.Grid.DebugDraw(screen, g.ShiftX, g.ShiftY, true)
+	img := ebiten.NewImage(g.ResolutionX, g.ResolutionY)
+
+	g.Grid.DebugDraw(img, g.ShiftX, g.ShiftY, true)
 
 	fps := ebiten.ActualFPS()
 	tps := ebiten.ActualTPS()
 
 	x, y := ebiten.CursorPosition()
-	cellX, cellY, exists := g.Grid.CellCoordinatesFromPos(x+g.ShiftX, y+g.ShiftY)
+	cellX, cellY, exists := g.Grid.GetCellCoordinates(x+g.ShiftX, y+g.ShiftY)
+	cellOriginX, cellOriginY := 0, 0
+	cellCenterX, cellCenterY := 0, 0
+	if exists {
+		cellOriginX, cellOriginY, _ = g.Grid.GetCellOriginPosition(cellX, cellY)
+		cellCenterX, cellCenterY, _ = g.Grid.GetCellCenterPosition(cellX, cellY)
+	}
 
-	ebitenutil.DebugPrint(screen, fmt.Sprint(
+	ebitenutil.DebugPrint(img, fmt.Sprint(
 		"FPS: ", fps,
 		"\nTPS: ", tps,
 		"\n",
 		"\nCursor: ", x, y,
 		"\nCell on cursor: ", cellX, cellY, exists,
+		"\nCell position: ", cellOriginX-g.ShiftX, cellOriginY-g.ShiftY,
+		"\nCell center: ", cellCenterX-g.ShiftX, cellCenterY-g.ShiftY,
 		"\n",
 		"\nCamera (WASD): ", g.ShiftX, g.ShiftY,
 		"\nInclineX (Up/Down): ", g.Grid.InclineX,
@@ -105,8 +116,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		"\nCellWidth (I/K): ", g.Grid.CellWidth,
 		"\nCellHeight (O/L): ", g.Grid.CellHeight,
 	))
+
+	if exists {
+		drawSquareInCenter(cellOriginX-g.ShiftX, cellOriginY-g.ShiftY, 7, img, color.RGBA{G: 255, A: 255})
+		drawSquareInCenter(cellCenterX-g.ShiftX, cellCenterY-g.ShiftY, 7, img, color.RGBA{B: 255, A: 255})
+	}
+
+	screen.DrawImage(img, nil)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return outsideWidth, outsideHeight
+}
+
+func drawSquareInCenter(posX, posY, s int, img *ebiten.Image, c color.Color) {
+	sh := s / 2
+	for x := -sh; x < sh; x++ {
+		for y := -sh; y < sh; y++ {
+			img.Set(posX+x, posY+y, c)
+		}
+	}
 }
