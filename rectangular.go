@@ -55,7 +55,7 @@ func NewRectGrid(cellWidth, cellHeight, columns, rows int) *RectGrid {
 	}
 }
 
-func (g *RectGrid) CellCoordinatesFromPos(posX, posY int) (int, int, bool) {
+func (g *RectGrid) GetCellCoordinates(posX, posY int) (int, int, bool) {
 	pxf := float64(posX)
 	pyf := float64(posY)
 
@@ -84,7 +84,7 @@ func (g *RectGrid) CellCoordinatesFromPos(posX, posY int) (int, int, bool) {
 	return int(possibleX), int(possibleY), true
 }
 
-func (g *RectGrid) CellPosFromCoordinates(coordsX, coordsY int) (int, int, bool) {
+func (g *RectGrid) GetCellOriginPosition(coordsX, coordsY int) (int, int, bool) {
 	if g.finite {
 		if coordsX < 0 || coordsY < 0 || coordsX >= g.Columns || coordsY >= g.Rows {
 			return 0, 0, false
@@ -105,14 +105,32 @@ func (g *RectGrid) CellPosFromCoordinates(coordsX, coordsY int) (int, int, bool)
 	return int(math.Floor(x)), int(math.Floor(y)), true
 }
 
-//func (g *RectGrid) CellCenterPos(coordsX, coordsY int) (int, int, bool) {
-//	cellPos := g.Cell
-//
-//	widthHalf := float64(g.CellWidth) / 2.
-//	heightHalf := float64(g.CellHeight) / 2.
-//
-//
-//}
+func (g *RectGrid) GetCellCenterPosition(coordsX, coordsY int) (int, int, bool) {
+	if g.finite {
+		if coordsX < 0 || coordsY < 0 || coordsX >= g.Columns || coordsY >= g.Rows {
+			return 0, 0, false
+		}
+	}
+
+	det := 1 - g.InclineY*g.InclineX
+	if det == 0 {
+		return 0, 0, false
+	}
+
+	halfCellWidth := float64(g.CellWidth) * g.Scale / 2
+	halfCellHeight := float64(g.CellHeight) * g.Scale / 2
+
+	fullWidth := float64(g.CellWidth+g.HorizontalSpacing) * g.Scale
+	fullHeight := float64(g.CellHeight+g.VerticalSpacing) * g.Scale
+
+	targetW := float64(coordsX)*fullWidth + halfCellWidth
+	targetH := float64(coordsY)*fullHeight + halfCellHeight
+
+	x := (targetW - g.InclineY*targetH) / det
+	y := (targetH - g.InclineX*targetW) / det
+
+	return int(math.Floor(x)), int(math.Floor(y)), true
+}
 
 func (g *RectGrid) DebugDraw(screen *ebiten.Image, shiftX, shiftY int, drawCoordinates bool) {
 	screenSize := screen.Bounds()
