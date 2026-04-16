@@ -40,7 +40,7 @@ newGrid.InclineY = 1
 cellX, cellY, exists := grid.GetCellCoordinates(posX, posY)
 
 // Get position of origin of the cell
-ox, py, exists := grid.GetCellOriginPosition(cellX, cellY)
+ox, oy, exists := grid.GetCellOriginPosition(cellX, cellY)
 
 // Get position in the center of the cell
 cx, cy, exists := grid.GetCellCenterPosition(cellX, cellY)
